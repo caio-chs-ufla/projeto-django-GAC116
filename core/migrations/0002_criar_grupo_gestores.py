@@ -32,8 +32,12 @@ def criar_grupo_gestores(apps, schema_editor):
 
     permissoes = []
     for app_label, model, codename in PERMISSOES_GESTORES:
-        ct = ContentType.objects.get(app_label=app_label, model=model)
-        perm = Permission.objects.get(content_type=ct, codename=codename)
+        ct, _ = ContentType.objects.get_or_create(app_label=app_label, model=model)
+        perm, _ = Permission.objects.get_or_create(
+            content_type=ct,
+            codename=codename,
+            defaults={'name': codename},
+        )
         permissoes.append(perm)
 
     grupo.permissions.set(permissoes)
