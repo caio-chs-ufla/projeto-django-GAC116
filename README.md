@@ -29,7 +29,7 @@ Gestor (User — grupo: Gestores)
     └── acesso ao Django Admin restrito à sua Academia
     └── CRUD: Aluno, Plano, Matricula
 
-Aluno (User)
+Aluno (User + AlunoPerfil)
     └── login email/senha → área /aluno/
     └── check-in via reconhecimento facial (tela pública)
 
@@ -46,10 +46,11 @@ Acesso ──(N:1)────── Academia
 | Tabela | Campos principais |
 |--------|-------------------|
 | `User` | id, email, password, first_name, last_name *(Django built-in)* |
+| `AlunoPerfil` | id, user (FK), cpf, telefone, data_nascimento, foto, face_encoding |
 | `Academia` | id, nome, cnpj, endereco, gestor (FK User), ativa |
 | `Plano` | id, academia (FK), nome, max_checkins_dia, valor |
 | `Matricula` | id, aluno (FK User), academia (FK), plano (FK), data_inicio, data_fim, ativa |
-| `Acesso` | id, aluno (FK), academia (FK), timestamp, liberado, confianca |
+| `Acesso` | id, aluno (FK), academia (FK), timestamp, status, confianca |
 
 ### Regras de Negócio
 
@@ -58,15 +59,28 @@ Acesso ──(N:1)────── Academia
 - Cada academia possui exatamente um gestor
 - O check-in é realizado via reconhecimento facial em tela pública, sem necessidade de login
 - A área do aluno (login/senha) é separada da tela de check-in
+- O status do acesso pode ser: `LIBERADO`, `NEGADO` ou `DESCONHECIDO`
 
 ## Tecnologias
 
-- Python 3.12
-- Django 5.x
-- face_recognition (reconhecimento facial)
-- Bootstrap 5 (interface responsiva)
-- SQLite (desenvolvimento)
-- Django Admin (painel administrativo)
+| Tecnologia | Versão | Uso |
+|------------|--------|-----|
+| Python | 3.12 | Linguagem principal |
+| Django | 6.x | Framework web |
+| face_recognition | 1.x | Reconhecimento facial (dlib) |
+| OpenCV | 4.x | Captura e processamento de imagens |
+| Pillow | 11.x | Manipulação de imagens (ImageField) |
+| NumPy | 2.x | Serialização dos encodings faciais |
+| Bootstrap | 5.x | Interface responsiva |
+| SQLite | — | Banco de dados (desenvolvimento) |
+
+## Pré-requisitos
+
+```bash
+# Dependências de sistema (Ubuntu/Debian)
+sudo apt update
+sudo apt install python3.12 python3.12-venv python3-dev cmake build-essential
+```
 
 ## Como Executar
 
@@ -79,13 +93,13 @@ cd projeto-django-GAC116
 python3 -m venv venv
 source venv/bin/activate
 
-# Instalar dependências
+# Instalar dependências Python
 pip install -r requirements.txt
 
 # Aplicar migrações
 python manage.py migrate
 
-# Criar superusuário
+# Criar superusuário (acesso ao Django Admin)
 python manage.py createsuperuser
 
 # Iniciar servidor
@@ -93,6 +107,23 @@ python manage.py runserver
 ```
 
 Acesse em `http://127.0.0.1:8000` e o painel admin em `http://127.0.0.1:8000/admin`.
+
+## Estrutura do Projeto
+
+```
+projeto-django-GAC116/
+├── config/             # Configurações do projeto Django
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── core/               # App principal
+│   ├── models.py       # Modelos de dados
+│   ├── admin.py        # Configuração do Django Admin
+│   ├── views.py        # Views
+│   └── migrations/     # Migrações do banco de dados
+├── manage.py
+└── requirements.txt
+```
 
 ## Equipe
 
