@@ -61,6 +61,29 @@ Acesso ──(N:1)────── Academia
 - A área do aluno (login/senha) é separada da tela de check-in
 - O status do acesso pode ser: `LIBERADO`, `NEGADO` ou `DESCONHECIDO`
 
+## Painel Administrativo (Django Admin)
+
+O sistema possui dois níveis de acesso ao painel `/admin`:
+
+### Superadmin
+Acesso total ao sistema. Responsável por:
+- Cadastrar academias e atribuir gestores
+- Gerenciar todos os usuários, planos, matrículas e acessos
+- Criar o grupo `Gestores` (criado automaticamente via migration)
+
+### Gestor
+Acesso restrito à sua academia. Criado pelo superadmin com `Staff status` ativo e adicionado ao grupo `Gestores`.
+
+| Recurso | Pode ver | Pode adicionar | Pode editar | Pode excluir |
+|---------|----------|----------------|-------------|--------------|
+| Academias | Somente a sua | Não | Não | Não |
+| Planos | Somente da sua academia | Sim | Sim | Sim |
+| Matrículas | Somente da sua academia | Sim | Sim | Sim |
+| Acessos | Somente da sua academia | Não | Não | Não |
+| Usuários (alunos) | Somente matriculados na sua academia | Sim | Sim | Não |
+
+> O grupo `Gestores` é criado automaticamente ao rodar `python manage.py migrate`. Para tornar um usuário gestor: marcar `Staff status` e adicionar ao grupo `Gestores` no painel admin.
+
 ## Tecnologias
 
 | Tecnologia | Versão | Uso |
