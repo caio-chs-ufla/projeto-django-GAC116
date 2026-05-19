@@ -95,7 +95,9 @@ Acesso restrito à sua academia. Criado pelo superadmin com `Staff status` ativo
 | Pillow | 11.x | Manipulação de imagens (ImageField) |
 | NumPy | 2.x | Serialização dos encodings faciais |
 | Bootstrap | 5.x | Interface responsiva |
-| SQLite | — | Banco de dados (desenvolvimento) |
+| PostgreSQL | 16 | Banco de dados (via Docker) |
+| Docker | 28+ | Containerização do banco de dados |
+| psycopg2-binary | 2.x | Driver Python para PostgreSQL |
 
 ## Pré-requisitos
 
@@ -103,6 +105,11 @@ Acesso restrito à sua academia. Criado pelo superadmin com `Staff status` ativo
 # Dependências de sistema (Ubuntu/Debian)
 sudo apt update
 sudo apt install python3.12 python3.12-venv python3-dev cmake build-essential
+
+# Docker (necessário para o banco de dados)
+# Instalar Docker Desktop ou Docker Engine
+docker --version
+docker compose version
 ```
 
 ## Como Executar
@@ -119,7 +126,12 @@ source venv/bin/activate
 # Instalar dependências Python
 pip install -r requirements.txt
 
-# Aplicar migrações
+# Subir banco de dados PostgreSQL
+cd docker
+docker compose up -d
+cd ..
+
+# Aplicar migrações (cria tabelas e grupo Gestores automaticamente)
 python manage.py migrate
 
 # Criar superusuário (acesso ao Django Admin)
@@ -130,6 +142,31 @@ python manage.py runserver
 ```
 
 Acesse em `http://127.0.0.1:8000` e o painel admin em `http://127.0.0.1:8000/admin`.
+
+## Banco de Dados
+
+O projeto utiliza **PostgreSQL 16** via Docker. O arquivo `docker/docker-compose.yml` sobe o container automaticamente.
+
+```bash
+# Subir banco
+cd docker && docker compose up -d
+
+# Parar banco
+cd docker && docker compose down
+
+# Ver logs do banco
+cd docker && docker compose logs db
+```
+
+Configuração de conexão (definida em `config/settings.py`):
+
+| Parâmetro | Valor |
+|-----------|-------|
+| Host | localhost |
+| Porta | 5432 |
+| Banco | gymaccess |
+| Usuário | gymaccess |
+| Senha | gymaccess |
 
 ## Estrutura do Projeto
 
