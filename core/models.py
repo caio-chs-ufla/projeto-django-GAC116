@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -51,6 +52,26 @@ class AlunoPerfil(models.Model):
 
     def __str__(self):
         return self.user.get_full_name()
+
+    def save(self, *args, **kwargs):
+        from .utils import extrair_encoding
+
+        foto_anterior = None
+        if self.pk:
+            try:
+                foto_anterior = AlunoPerfil.objects.get(pk=self.pk).foto
+            except AlunoPerfil.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        foto_mudou = self.foto and self.foto != foto_anterior
+        if foto_mudou:
+            try:
+                self.face_encoding = extrair_encoding(self.foto.path)
+            except ValueError as e:
+                raise ValidationError(str(e))
+            AlunoPerfil.objects.filter(pk=self.pk).update(face_encoding=self.face_encoding)
 
 
 class Matricula(models.Model):

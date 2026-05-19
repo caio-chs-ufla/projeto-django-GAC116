@@ -1,13 +1,26 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.html import format_html
 from .models import Academia, AlunoPerfil, Plano, Matricula, Acesso
 
 
 class AlunoPerfilInline(admin.StackedInline):
     model = AlunoPerfil
     can_delete = False
-    fields = ('cpf', 'telefone', 'data_nascimento', 'foto')
+    fields = ('cpf', 'telefone', 'data_nascimento', 'foto', 'status_encoding')
+    readonly_fields = ('status_encoding',)
+
+    def status_encoding(self, obj):
+        if not obj or not obj.pk:
+            return '—'
+        if not obj.foto:
+            return format_html('<span style="color:#999">Pendente — sem foto</span>')
+        if obj.face_encoding:
+            return format_html('<span style="color:green">✓ Encoding gerado</span>')
+        return format_html('<span style="color:red">✗ Falhou — reenvie a foto</span>')
+
+    status_encoding.short_description = 'Reconhecimento facial'
 
 
 class UserAdmin(BaseUserAdmin):
