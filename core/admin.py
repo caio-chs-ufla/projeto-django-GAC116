@@ -25,6 +25,7 @@ class AlunoPerfilInline(admin.StackedInline):
 
 class UserAdmin(BaseUserAdmin):
     inlines = (AlunoPerfilInline,)
+    search_fields = BaseUserAdmin.search_fields + ('email', 'first_name', 'last_name')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -42,6 +43,7 @@ class AcademiaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'cnpj', 'gestor', 'ativa')
     list_filter = ('ativa',)
     search_fields = ('nome', 'cnpj')
+    list_select_related = ('gestor',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -59,7 +61,8 @@ class AcademiaAdmin(admin.ModelAdmin):
 class PlanoAdmin(admin.ModelAdmin):
     list_display = ('nome', 'academia', 'max_checkins_dia', 'valor')
     list_filter = ('academia',)
-    search_fields = ('nome',)
+    search_fields = ('nome', 'academia__nome')
+    list_select_related = ('academia',)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -77,7 +80,16 @@ class PlanoAdmin(admin.ModelAdmin):
 class MatriculaAdmin(admin.ModelAdmin):
     list_display = ('aluno', 'academia', 'plano', 'data_inicio', 'data_fim', 'ativa')
     list_filter = ('academia', 'ativa')
-    search_fields = ('aluno__first_name', 'aluno__last_name', 'aluno__email')
+    search_fields = (
+        'aluno__username',
+        'aluno__first_name',
+        'aluno__last_name',
+        'aluno__email',
+        'academia__nome',
+        'plano__nome',
+    )
+    list_select_related = ('aluno', 'academia', 'plano')
+    date_hierarchy = 'data_inicio'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -98,8 +110,10 @@ class MatriculaAdmin(admin.ModelAdmin):
 class AcessoAdmin(admin.ModelAdmin):
     list_display = ('aluno', 'academia', 'status', 'confianca', 'timestamp')
     list_filter = ('status', 'academia')
-    search_fields = ('aluno__first_name', 'aluno__last_name')
+    search_fields = ('aluno__username', 'aluno__first_name', 'aluno__last_name', 'academia__nome')
     readonly_fields = ('aluno', 'academia', 'status', 'confianca', 'timestamp')
+    list_select_related = ('aluno', 'academia')
+    date_hierarchy = 'timestamp'
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
