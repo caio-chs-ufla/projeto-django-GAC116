@@ -1,6 +1,13 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
+
+
+def nome_usuario(user):
+    return user.get_full_name() or user.username or user.email
 
 
 class Academia(models.Model):
@@ -27,8 +34,12 @@ class Academia(models.Model):
 class Plano(models.Model):
     academia = models.ForeignKey(Academia, on_delete=models.CASCADE, related_name='planos')
     nome = models.CharField(max_length=50)
-    max_checkins_dia = models.PositiveIntegerField(default=1)
-    valor = models.DecimalField(max_digits=8, decimal_places=2)
+    max_checkins_dia = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    valor = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
 
     class Meta:
         verbose_name = 'Plano'
@@ -51,7 +62,7 @@ class AlunoPerfil(models.Model):
         verbose_name_plural = 'Perfis dos Alunos'
 
     def __str__(self):
-        return self.user.get_full_name()
+        return nome_usuario(self.user)
 
     def save(self, *args, **kwargs):
         from .utils import extrair_encoding
@@ -87,8 +98,20 @@ class Matricula(models.Model):
         verbose_name_plural = 'Matrículas'
         unique_together = ('aluno', 'academia')
 
+    def clean(self):
+        errors = {}
+
+        if self.data_inicio and self.data_fim and self.data_fim < self.data_inicio:
+            errors['data_fim'] = 'A data final nao pode ser anterior a data inicial.'
+
+        if self.plano_id and self.academia_id and self.plano.academia_id != self.academia_id:
+            errors['plano'] = 'O plano selecionado deve pertencer a academia da matricula.'
+
+        if errors:
+            raise ValidationError(errors)
+
     def __str__(self):
-        return f'{self.aluno.get_full_name()} — {self.academia.nome}'
+        return f'{nome_usuario(self.aluno)} — {self.academia.nome}'
 
 
 class Acesso(models.Model):
@@ -115,5 +138,5 @@ class Acesso(models.Model):
         ordering = ['-timestamp']
 
     def __str__(self):
-        nome = self.aluno.get_full_name() if self.aluno else 'Desconhecido'
+        nome = nome_usuario(self.aluno) if self.aluno else 'Desconhecido'
         return f'{self.get_status_display()} — {nome} — {self.academia.nome}'
