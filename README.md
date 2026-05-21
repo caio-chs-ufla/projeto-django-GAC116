@@ -198,6 +198,7 @@ projeto-django-GAC116/
 │   ├── models.py               # Modelos de dados
 │   ├── admin.py                # Configuração do Django Admin
 │   ├── views.py                # Endpoint de check-in
+│   ├── tests.py                # Testes de funcionamento
 │   ├── urls.py                 # Rotas da aplicação
 │   ├── utils.py                # Lógica de reconhecimento facial
 │   └── migrations/             # Migrações do banco de dados
@@ -210,8 +211,8 @@ projeto-django-GAC116/
 
 ## Equipe
 
-| Nome | GitHub |
-|------|--------|
-|      |        |
-|      |        |
-|      |        |
+| Nome              | GitHub         |
+|-------------------|----------------|
+|Caio Souza         | caio-chs-ufla  |
+|Leonardo Guimarães | leoguimaraes49 |
+|Matheus Coutinho   | matheusfgcz    |
