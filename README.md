@@ -18,6 +18,10 @@ Cada academia possui um gestor responsável, que gerencia os alunos, planos e ma
 
 ## Modelagem de Dados
 
+### Diagrama MER
+
+![Diagrama Entidade-Relacionamento (MER)](docs/diagramas/mer.png)
+
 ### Entidades e Relacionamentos
 
 ```
