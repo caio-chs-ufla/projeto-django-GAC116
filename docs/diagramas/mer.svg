@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <rect x="40" y="40" width="1120" height="720" rx="12" ry="12" fill="#f5f7fb" stroke="#c7d2fe" stroke-width="2"/>
+  <text x="600" y="140" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="#1f2937" font-weight="700">
+    DIAGRAMA ENTIDADE-RELACIONAMENTO (MER)
+  </text>
+  <text x="600" y="190" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#4b5563">
+    Projeto Django GAC116 — GymAccess
+  </text>
+  <text x="600" y="420" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#6b7280">
+    (Substitua este placeholder pelo diagrama oficial)
+  </text>
+</svg>
