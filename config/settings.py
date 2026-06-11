@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +40,26 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
 ]
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'GymAccess Admin',
+    'site_header': 'GymAccess',
+    'site_brand': 'GymAccess',
+    'welcome_sign': 'Painel administrativo do GymAccess',
+    'copyright': 'GAC116 - Programacao Web',
+    'search_model': ['auth.User', 'core.Academia', 'core.Matricula'],
+    'show_sidebar': True,
+    'navigation_expanded': True,
+    'icons': {
+        'auth.User': 'fas fa-users',
+        'auth.Group': 'fas fa-user-shield',
+        'core.Academia': 'fas fa-building',
+        'core.Plano': 'fas fa-list-check',
+        'core.Matricula': 'fas fa-id-card',
+        'core.Acesso': 'fas fa-door-open',
+        'core.AlunoPerfil': 'fas fa-user',
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
