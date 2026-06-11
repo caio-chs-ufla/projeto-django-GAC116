@@ -13,6 +13,8 @@ Cada academia possui um gestor responsável, que gerencia os alunos, planos e ma
 - Cadastro de alunos com encoding facial gerado automaticamente ao salvar a foto
 - Check-in por reconhecimento facial via endpoint POST por academia
 - Painel administrativo para gestores (Django Admin)
+- Ambiente de usuário protegido por login e senha
+- Dashboard responsivo com Bootstrap para superadmin, gestores e alunos
 - Controle de planos com limite de check-ins diários por academia
 - Suporte a múltiplas academias com gestores independentes
 
@@ -148,6 +150,37 @@ python manage.py runserver
 ```
 
 Painel admin em `http://127.0.0.1:8000/admin`.
+
+## Ambiente de Usuário
+
+Além do painel administrativo, o sistema possui uma área autenticada para usuários:
+
+| Rota | Descrição |
+|------|-----------|
+| `/login/` | Login da aplicação |
+| `/dashboard/` | Dashboard do usuário autenticado |
+| `/checkin/` | Tela para envio de imagem e registro de check-in |
+| `/logout/` | Saída da aplicação |
+
+O dashboard adapta os dados exibidos conforme o perfil:
+
+- Superadmin: visão geral de academias, planos, matrículas e acessos
+- Gestor: dados restritos à academia gerenciada
+- Aluno: matrículas e acessos vinculados ao próprio usuário
+
+Para criar dados de demonstração:
+
+```bash
+python manage.py seed_demo
+```
+
+Credenciais geradas:
+
+| Perfil | Usuário | Senha |
+|--------|---------|-------|
+| Superadmin | `admin` | `admin12345` |
+| Gestor | `gestor` | `gestor12345` |
+| Aluno | `aluno` | `aluno12345` |
 
 ## Endpoint de Check-in
 

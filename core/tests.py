@@ -5,6 +5,7 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 from .admin import AcademiaAdmin, AcessoAdmin, MatriculaAdmin, PlanoAdmin
 from .models import Academia, Acesso, Matricula, Plano
@@ -176,3 +177,82 @@ class CheckpointAdminScopingTests(TestCase):
         qs = model_admin.get_queryset(self.request_for(self.gestor_a))
 
         self.assertEqual(list(qs), [self.acesso_a])
+
+
+class CheckpointUserInterfaceTests(TestCase):
+    def setUp(self):
+        hoje = date.today()
+        self.gestor = User.objects.create_user(
+            username='gestor-ui',
+            password='senha12345',
+            first_name='Gestor',
+        )
+        self.aluno = User.objects.create_user(
+            username='aluno-ui',
+            password='senha12345',
+            first_name='Aluno',
+        )
+        self.academia = Academia.objects.create(
+            nome='Gym UI',
+            cnpj='33.333.333/0001-33',
+            endereco='Rua UI',
+            gestor=self.gestor,
+        )
+        self.plano = Plano.objects.create(
+            academia=self.academia,
+            nome='Mensal UI',
+            max_checkins_dia=1,
+            valor=Decimal('89.90'),
+        )
+        self.matricula = Matricula.objects.create(
+            aluno=self.aluno,
+            academia=self.academia,
+            plano=self.plano,
+            data_inicio=hoje,
+            data_fim=hoje + timedelta(days=30),
+        )
+
+    def test_home_redireciona_para_login_quando_anonimo(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertRedirects(response, reverse('login'), fetch_redirect_response=False)
+
+    def test_dashboard_exige_login(self):
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response['Location'])
+
+    def test_dashboard_renderiza_para_gestor(self):
+        self.client.login(username='gestor-ui', password='senha12345')
+
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Gestor')
+        self.assertContains(response, 'Gym UI')
+
+    def test_dashboard_renderiza_para_aluno(self):
+        self.client.login(username='aluno-ui', password='senha12345')
+
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Aluno')
+        self.assertContains(response, 'Gym UI')
+
+    def test_checkin_page_exige_login(self):
+        response = self.client.get(reverse('checkin_page'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('login'), response['Location'])
+
+    def test_checkin_retorna_erro_para_imagem_invalida(self):
+        response = self.client.post(
+            reverse('checkin_verificar', args=[self.academia.pk]),
+            data='{"imagem": "nao-e-base64"}',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('erro', response.json())
