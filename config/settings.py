@@ -47,7 +47,6 @@ JAZZMIN_SETTINGS = {
     'site_brand': 'GymAccess',
     'welcome_sign': 'Painel administrativo do GymAccess',
     'copyright': 'GAC116 - Programacao Web',
-    'search_model': ['auth.User', 'core.Academia', 'core.Matricula'],
     'show_sidebar': True,
     'navigation_expanded': True,
     'icons': {

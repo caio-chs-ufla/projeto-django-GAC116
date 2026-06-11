@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 from django.utils.html import format_html
-from .models import Academia, AlunoPerfil, Plano, Matricula, Acesso
+
+from .models import Acesso, Academia, AlunoPerfil, Matricula, Plano
 
 
 class AlunoPerfilInline(admin.StackedInline):
@@ -13,18 +14,70 @@ class AlunoPerfilInline(admin.StackedInline):
 
     def status_encoding(self, obj):
         if not obj or not obj.pk:
-            return '—'
+            return '-'
         if not obj.foto:
-            return format_html('<span style="color:#999">Pendente — sem foto</span>')
+            return format_html(
+                '<span style="color:{}">{}</span>',
+                '#999',
+                'Pendente - sem foto',
+            )
         if obj.face_encoding:
-            return format_html('<span style="color:green">✓ Encoding gerado</span>')
-        return format_html('<span style="color:red">✗ Falhou — reenvie a foto</span>')
+            return format_html(
+                '<span style="color:{}">{}</span>',
+                'green',
+                'Encoding gerado',
+            )
+        return format_html(
+            '<span style="color:{}">{}</span>',
+            'red',
+            'Falhou - reenvie a foto',
+        )
 
     status_encoding.short_description = 'Reconhecimento facial'
 
 
+class TipoUsuarioFilter(admin.SimpleListFilter):
+    title = 'Tipo de usuario'
+    parameter_name = 'tipo_usuario'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('aluno', 'Alunos'),
+            ('gestor', 'Gestores'),
+            ('admin', 'Administradores'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'aluno':
+            return queryset.filter(is_staff=False, is_superuser=False)
+        if self.value() == 'gestor':
+            return queryset.filter(is_staff=True, is_superuser=False)
+        if self.value() == 'admin':
+            return queryset.filter(is_superuser=True)
+        return queryset
+
+
+class StatusUsuarioFilter(admin.SimpleListFilter):
+    title = 'Status'
+    parameter_name = 'status_usuario'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('ativo', 'Usuarios ativos'),
+            ('inativo', 'Usuarios inativos'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ativo':
+            return queryset.filter(is_active=True)
+        if self.value() == 'inativo':
+            return queryset.filter(is_active=False)
+        return queryset
+
+
 class UserAdmin(BaseUserAdmin):
     inlines = (AlunoPerfilInline,)
+    list_filter = (TipoUsuarioFilter, StatusUsuarioFilter)
     search_fields = BaseUserAdmin.search_fields + ('email', 'first_name', 'last_name')
 
     def get_queryset(self, request):

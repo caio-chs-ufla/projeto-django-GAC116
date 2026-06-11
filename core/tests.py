@@ -8,7 +8,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from .admin import AcademiaAdmin, AcessoAdmin, MatriculaAdmin, PlanoAdmin
-from .models import Academia, Acesso, Matricula, Plano
+from .models import Academia, Acesso, AlunoPerfil, Matricula, Plano
 
 
 class CheckpointModelValidationTests(TestCase):
@@ -177,6 +177,54 @@ class CheckpointAdminScopingTests(TestCase):
         qs = model_admin.get_queryset(self.request_for(self.gestor_a))
 
         self.assertEqual(list(qs), [self.acesso_a])
+
+
+class CheckpointAdminRenderingTests(TestCase):
+    def test_admin_renderiza_edicao_de_usuario_com_perfil_sem_foto(self):
+        admin_user = User.objects.create_superuser(
+            username='admin-render',
+            password='senha12345',
+        )
+        aluno = User.objects.create_user(
+            username='aluno-render',
+            password='senha12345',
+        )
+        AlunoPerfil.objects.create(
+            user=aluno,
+            cpf='444.555.666-77',
+            telefone='(35) 95555-4444',
+        )
+
+        self.client.force_login(admin_user)
+        response = self.client.get(reverse('admin:auth_user_change', args=[aluno.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Pendente - sem foto')
+
+    def test_admin_user_filter_tipo_usuario_lista_apenas_alunos(self):
+        admin_user = User.objects.create_superuser(
+            username='admin-filter',
+            password='senha12345',
+        )
+        User.objects.create_user(
+            username='aluno-filter',
+            password='senha12345',
+        )
+        User.objects.create_user(
+            username='gestor-filter',
+            password='senha12345',
+            is_staff=True,
+        )
+
+        self.client.force_login(admin_user)
+        response = self.client.get(
+            reverse('admin:auth_user_changelist'),
+            {'tipo_usuario': 'aluno'},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'aluno-filter')
+        self.assertNotContains(response, 'gestor-filter')
 
 
 class CheckpointUserInterfaceTests(TestCase):
