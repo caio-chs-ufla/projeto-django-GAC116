@@ -1,0 +1,117 @@
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard | GymAccess{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-secondary mb-0">Visao de {{ perfil }} para acompanhamento operacional.</p>
+    </div>
+    <div class="d-flex gap-2 align-items-start">
+        <a class="btn btn-primary" href="{% url 'checkin_page' %}">Registrar check-in</a>
+        {% if user.is_staff %}
+            <a class="btn btn-outline-secondary" href="{% url 'admin:index' %}">Abrir admin</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="bg-white metric-card p-3">
+            <div class="text-secondary small">Academias</div>
+            <div class="metric-value">{{ totais.academias }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="bg-white metric-card p-3">
+            <div class="text-secondary small">Planos</div>
+            <div class="metric-value">{{ totais.planos }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="bg-white metric-card p-3">
+            <div class="text-secondary small">Matriculas</div>
+            <div class="metric-value">{{ totais.matriculas }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="bg-white metric-card p-3">
+            <div class="text-secondary small">Acessos</div>
+            <div class="metric-value">{{ totais.acessos }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-xl-6">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="section-title mb-0">Matriculas recentes</h2>
+        </div>
+        <div class="table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Academia</th>
+                        <th>Plano</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for matricula in matriculas %}
+                        <tr>
+                            <td>{{ matricula.aluno.get_full_name|default:matricula.aluno.username }}</td>
+                            <td>{{ matricula.academia.nome }}</td>
+                            <td>{{ matricula.plano.nome|default:"-" }}</td>
+                            <td>
+                                {% if matricula.ativa %}
+                                    <span class="badge text-bg-success">Ativa</span>
+                                {% else %}
+                                    <span class="badge text-bg-secondary">Inativa</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-secondary">Nenhuma matricula encontrada.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="section-title mb-0">Ultimos acessos</h2>
+        </div>
+        <div class="table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Aluno</th>
+                        <th>Academia</th>
+                        <th>Status</th>
+                        <th>Horario</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for acesso in acessos %}
+                        <tr>
+                            <td>{% if acesso.aluno %}{{ acesso.aluno.get_full_name|default:acesso.aluno.username }}{% else %}Desconhecido{% endif %}</td>
+                            <td>{{ acesso.academia.nome }}</td>
+                            <td><span class="badge text-bg-light border">{{ acesso.status }}</span></td>
+                            <td>{{ acesso.timestamp|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="text-secondary">Nenhum acesso registrado.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

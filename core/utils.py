@@ -1,10 +1,11 @@
 import base64
+import binascii
 import io
 from datetime import date
 
 import face_recognition
 import numpy as np
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 THRESHOLD = 0.5
 
@@ -29,8 +30,12 @@ def _decodificar_base64(imagem_base64: str) -> np.ndarray:
     if "," in imagem_base64:
         imagem_base64 = imagem_base64.split(",", 1)[1]
 
-    image_bytes = base64.b64decode(imagem_base64)
-    pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    try:
+        image_bytes = base64.b64decode(imagem_base64)
+        pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    except (binascii.Error, UnidentifiedImageError) as exc:
+        raise ValueError("Imagem invalida. Envie uma imagem em base64.") from exc
+
     return np.array(pil_image)
 
 
